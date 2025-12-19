@@ -1,1 +1,1 @@
-[Play the SemmelSiggi Puzzel](https://shorturl.at/CIZjc)
+[Play the SemmelSiggi Puzzle](https://shorturl.at/CIZjc)
