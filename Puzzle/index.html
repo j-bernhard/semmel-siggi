@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SemmelSiggi Puzzle</title>
+  <style>
+    :root { --gap: 10px; --pad: 12px; --radius: 16px; --shadow: 0 10px 30px rgba(0,0,0,.18); }
+    * { box-sizing: border-box; }
+
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background: radial-gradient(1200px 800px at 50% 0%, #222, #0f0f10);
+      color:#f2f2f2;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding: calc(var(--pad) + env(safe-area-inset-top)) var(--pad)
+               calc(var(--pad) + env(safe-area-inset-bottom)) var(--pad);
+      overflow: hidden; /* kein Scrollen */
+    }
+
+    .wrap{
+      width: min(92vw, 520px); /* JS kann kleiner setzen */
+      display: grid;
+      gap: var(--gap);
+      position: relative;
+      z-index: 1;
+    }
+
+    header{ display:grid; gap:6px; }
+    h1{ font-size:20px; margin:0; letter-spacing:.2px; }
+    .sub{ margin:0; color:rgba(255,255,255,.75); font-size:14px; line-height:1.35; }
+
+    .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    button{
+      appearance:none; border:0; border-radius:999px;
+      padding:10px 12px; background:rgba(255,255,255,.12);
+      color:#fff; cursor:pointer; font-weight:800; font-size:14px;
+      transition: transform .06s ease, background .2s ease;
+      user-select:none;
+    }
+    button:active{ transform: translateY(1px) scale(.99); }
+    button:hover{ background:rgba(255,255,255,.18); }
+
+    .board{
+      background:rgba(255,255,255,.06);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:6px;
+      overflow:hidden;
+    }
+
+    .grid{
+      display:grid;
+      gap:6px;
+      width:100%;
+      /* Höhe setzt JS passend zum Bildseitenverhältnis UND Viewport */
+    }
+
+    .tile{
+      border-radius:12px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+      background-repeat:no-repeat;
+      cursor:pointer;
+      transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+      touch-action: manipulation;
+    }
+    .tile:hover{ filter:brightness(1.03); }
+    .tile:active{ transform:scale(.99); }
+    .tile.selected{
+      box-shadow: 0 0 0 3px rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.15);
+      filter:brightness(1.08);
+    }
+
+    .fullimg{
+      width:100%;
+      display:none;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .fullimg img{ width:100%; height:auto; display:block; }
+
+    .success{
+      display:none;
+      border-radius:var(--radius);
+      padding: clamp(8px, 2.2vh, 14px);
+      background: linear-gradient(135deg, rgba(255,215,0,.30), rgba(255,105,180,.18));
+      border: 1px solid rgba(255,255,255,.28);
+      box-shadow: var(--shadow);
+      font-weight:950;
+      font-size: clamp(12px, 1.6vh, 14px);
+      line-height: 1.25;
+      text-shadow: 0 1px 0 rgba(0,0,0,.35);
+    }
+    .success .small{
+      display:block;
+      margin-top: clamp(4px, 1.2vh, 6px);
+      font-weight:800;
+      color: rgba(255,255,255,.95);
+    }
+
+    /* solved state */
+    .solved .board{ display:none; }
+    .solved .fullimg{ display:block; }
+    .solved .success{ display:block; }
+
+    /* Ultra-Safe Platzspar-Modi */
+    .compact .sub { display: none; }
+    .compact button { padding: 7px 10px; font-size: 13px; }
+    .compact .success {
+      font-size: clamp(11px, 1.4vh, 13px);
+      padding: clamp(6px, 1.8vh, 10px);
+    }
+
+    /* Confetti Canvas overlay */
+    #confettiCanvas{
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 10;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+  <div class="wrap" id="wrap">
+    <header id="header">
+      <h1>🧩 SemmelSiggi Puzzle</h1>
+      <p class="sub" id="subtitle">Tippe zwei Teile an, um sie zu tauschen. Wenn alles stimmt, wird das Bild freigeschaltet.</p>
+
+      <div class="controls" id="controls">
+        <button id="btnShuffle" type="button">Neu mischen</button>
+        <button id="btnSize" type="button" title="Wechselt Puzzlegröße">Größe: 4×6</button>
+      </div>
+    </header>
+
+    <!-- Puzzle -->
+    <div class="board" id="board">
+      <div id="grid" class="grid" aria-label="Puzzle"></div>
+    </div>
+
+    <!-- Komplettes Bild (bei Erfolg) -->
+    <div class="fullimg" id="fullimg" aria-label="Komplettes Bild">
+      <img id="fullImage" alt="SemmelSiggi komplett" />
+    </div>
+
+    <!-- Erfolgsmessage direkt unter dem Bild -->
+    <div class="success" id="success">
+      🎉 Yeah, du hast soeben das nächste Energielevel für SemmelSiggi freigeschlatet.
+      <span class="small">Pfannkuchen und Mandelmoppen (natürlich nur vom Gehre in Nickern).</span>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_IMAGE = "semmelsiggi.png"; // Bild in denselben Ordner legen (oder Dateiname anpassen)
+    const SIZES = [
+      { cols: 4, rows: 6 },
+      { cols: 3, rows: 4 },
+      { cols: 5, rows: 7 },
+    ];
+
+    let sizeIndex = 0;
+    let cols = SIZES[sizeIndex].cols;
+    let rows = SIZES[sizeIndex].rows;
+
+    let img = new Image();
+    let imgURL = DEFAULT_IMAGE;
+
+    let order = [];
+    let selectedPos = null;
+    let confettiPlayed = false;
+
+    const wrapEl = document.getElementById("wrap");
+    const headerEl = document.getElementById("header");
+    const boardEl = document.getElementById("board");
+    const gridEl = document.getElementById("grid");
+    const successEl = document.getElementById("success");
+
+    const btnShuffle = document.getElementById("btnShuffle");
+    const btnSize = document.getElementById("btnSize");
+    const fullImageEl = document.getElementById("fullImage");
+
+    // ----- Confetti -----
+    const confettiCanvas = document.getElementById("confettiCanvas");
+    const ctx = confettiCanvas.getContext("2d");
+    let confettiRAF = null;
+    let confettiEndAt = 0;
+    let confettiPieces = [];
+
+    function resizeConfettiCanvas(){
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      confettiCanvas.width = Math.floor(window.innerWidth * dpr);
+      confettiCanvas.height = Math.floor(window.innerHeight * dpr);
+      confettiCanvas.style.width = "100vw";
+      confettiCanvas.style.height = "100vh";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function makeConfetti(n=140){
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      confettiPieces = Array.from({length:n}, () => ({
+        x: Math.random() * w,
+        y: -20 - Math.random() * h * 0.5,
+        vx: (Math.random() - 0.5) * 2.2,
+        vy: 2 + Math.random() * 4.5,
+        r: 2 + Math.random() * 5,
+        rot: Math.random() * Math.PI,
+        vrot: (Math.random() - 0.5) * 0.2,
+        // zufällige helle Farbe
+        c: `hsl(${Math.floor(Math.random()*360)}, 90%, 60%)`,
+        shape: Math.random() < 0.55 ? "rect" : "circle"
+      }));
+    }
+
+    function startConfetti(durationMs=2600){
+      confettiPlayed = true;
+      resizeConfettiCanvas();
+      makeConfetti(170);
+      confettiCanvas.style.display = "block";
+      confettiEndAt = performance.now() + durationMs;
+
+      if (confettiRAF) cancelAnimationFrame(confettiRAF);
+      const tick = (t) => {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        for (const p of confettiPieces){
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vrot;
+
+          // leichtes "Wobble"
+          p.x += Math.sin(p.y * 0.02) * 0.3;
+
+          // Wrap horizontal
+          if (p.x < -20) p.x = w + 20;
+          if (p.x > w + 20) p.x = -20;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.c;
+
+          if (p.shape === "rect"){
+            ctx.fillRect(-p.r, -p.r*0.7, p.r*2, p.r*1.4);
+          } else {
+            ctx.beginPath();
+            ctx.arc(0,0,p.r,0,Math.PI*2);
+            ctx.fill();
+          }
+          ctx.restore();
+
+          // respawn if below
+          if (p.y > h + 30){
+            p.y = -20;
+            p.x = Math.random() * w;
+          }
+        }
+
+        if (t < confettiEndAt){
+          confettiRAF = requestAnimationFrame(tick);
+        } else {
+          stopConfetti();
+        }
+      };
+
+      confettiRAF = requestAnimationFrame(tick);
+    }
+
+    function stopConfetti(){
+      if (confettiRAF) cancelAnimationFrame(confettiRAF);
+      confettiRAF = null;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      confettiCanvas.style.display = "none";
+    }
+
+    // ----- Puzzle logic -----
+    function setSize(index) {
+      sizeIndex = index % SIZES.length;
+      cols = SIZES[sizeIndex].cols;
+      rows = SIZES[sizeIndex].rows;
+      btnSize.textContent = `Größe: ${cols}×${rows}`;
+    }
+
+    function isSolved() {
+      for (let i = 0; i < order.length; i++) if (order[i] !== i) return false;
+      return true;
+    }
+
+    function shuffleOrder() {
+      order = Array.from({ length: cols * rows }, (_, i) => i);
+      do {
+        for (let i = order.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [order[i], order[j]] = [order[j], order[i]];
+        }
+      } while (isSolved());
+    }
+
+    function clearSelection() {
+      selectedPos = null;
+      document.querySelectorAll(".tile.selected").forEach(t => t.classList.remove("selected"));
+    }
+
+    function swap(posA, posB) {
+      [order[posA], order[posB]] = [order[posB], order[posA]];
+    }
+
+    function setSolvedUI(solved) {
+      wrapEl.classList.toggle("solved", solved);
+      fitToViewport();
+      if (!solved) stopConfetti();
+      if (!solved) confettiPlayed = false;
+    }
+
+    // === Ultra-sichere Fit-to-viewport Logik ===
+    function fitToViewport() {
+      if (!img?.naturalWidth) return;
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const aspect = img.naturalHeight / img.naturalWidth;
+
+      const maxW = Math.min(520, Math.floor(vw * 0.92));
+      const minW = 200;
+
+      const gap = 10;
+      const reserve = 20; // konservativer Puffer gegen Abschneiden
+
+      const isSolvedState = wrapEl.classList.contains("solved");
+
+      // Reset: erstmal alles sichtbar
+      wrapEl.classList.remove("compact");
+
+      let w = maxW;
+
+      for (let i = 0; i < 5; i++) {
+        wrapEl.style.width = w + "px";
+
+        let headerH = headerEl.getBoundingClientRect().height;
+        let successH = isSolvedState ? successEl.getBoundingClientRect().height : 0;
+
+        let verticalGaps = isSolvedState ? gap * 2 : gap * 1;
+
+        let availableForMedia = vh - (headerH + successH + verticalGaps + reserve);
+
+        // Falls es nicht passt → Compact Mode aktivieren
+        if (availableForMedia < 140 && !wrapEl.classList.contains("compact")) {
+          wrapEl.classList.add("compact");
+          headerH = headerEl.getBoundingClientRect().height;
+          successH = isSolvedState ? successEl.getBoundingClientRect().height : 0;
+          availableForMedia = vh - (headerH + successH + verticalGaps + reserve);
+        }
+
+        const widthByHeight = Math.floor(Math.max(100, availableForMedia) / aspect);
+        const newW = Math.max(minW, Math.min(maxW, widthByHeight));
+
+        if (Math.abs(newW - w) <= 1) {
+          w = newW;
+          break;
+        }
+        w = newW;
+      }
+
+      wrapEl.style.width = w + "px";
+      const mediaH = Math.floor(w * aspect);
+      gridEl.style.height = mediaH + "px";
+    }
+
+    function buildGrid() {
+      setSolvedUI(false);
+      clearSelection();
+
+      gridEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+      // zuerst fitten, damit gridEl die richtige Breite hat
+      fitToViewport();
+
+      const bgSize = `${cols * 100}% ${rows * 100}%`;
+      gridEl.innerHTML = "";
+
+      for (let pos = 0; pos < cols * rows; pos++) {
+        const pieceIndex = order[pos];
+        const pieceCol = pieceIndex % cols;
+        const pieceRow = Math.floor(pieceIndex / cols);
+
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.setAttribute("role", "button");
+        tile.setAttribute("aria-label", `Teil ${pos + 1}`);
+
+        tile.style.backgroundImage = `url("${imgURL}")`;
+        tile.style.backgroundSize = bgSize;
+        tile.style.backgroundPosition =
+          `${(pieceCol * 100) / (cols - 1)}% ${(pieceRow * 100) / (rows - 1)}%`;
+
+        tile.addEventListener("click", () => {
+          if (selectedPos === null) {
+            selectedPos = pos;
+            tile.classList.add("selected");
+            return;
+          }
+          if (selectedPos === pos) {
+            clearSelection();
+            return;
+          }
+
+          swap(selectedPos, pos);
+          buildGrid();
+
+          if (isSolved()) {
+            fullImageEl.src = imgURL;
+            setSolvedUI(true);
+            if (!confettiPlayed) startConfetti(2700);
+          }
+        });
+
+        gridEl.appendChild(tile);
+      }
+    }
+
+    function startGame() {
+      setSolvedUI(false);
+      shuffleOrder();
+      requestAnimationFrame(() => buildGrid());
+    }
+
+    function loadImage(url) {
+      img = new Image();
+      img.onload = () => {
+        fullImageEl.src = url;
+        fitToViewport();
+        startGame();
+      };
+      img.onerror = () => console.warn("Konnte Bild nicht laden:", url);
+      img.src = url;
+    }
+
+    btnShuffle.addEventListener("click", () => startGame());
+    btnSize.addEventListener("click", () => { setSize(sizeIndex + 1); startGame(); });
+
+    window.addEventListener("resize", () => {
+      fitToViewport();
+      resizeConfettiCanvas();
+      if (!wrapEl.classList.contains("solved")) {
+        requestAnimationFrame(buildGrid);
+      }
+    });
+
+    // Init
+    setSize(0);
+    loadImage(imgURL);
+  </script>
+</body>
+</html>
