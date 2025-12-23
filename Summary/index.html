@@ -1,0 +1,1729 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>SemmelSiggi und der Weihnachtsstreak</title>
+  <meta name="theme-color" content="#0b0b10" />
+
+  <style>
+    :root{
+      --bg:#07070c; --bg2:#0b0b12;
+      --card:rgba(15,15,24,.78); --card2:rgba(18,18,37,.66);
+      --text:#f4f4ff; --muted:#b8b8d6;
+      --pink:#ff4fd8; --pink2:#ff2bb7; --pink3:#ff7ae6;
+      --line:#24243b; --shadow:0 18px 55px rgba(0,0,0,.45);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text);
+      background:
+        radial-gradient(1000px 700px at 15% -10%, rgba(255,79,216,.22), transparent 60%),
+        radial-gradient(900px 700px at 110% 20%, rgba(255,43,183,.18), transparent 55%),
+        radial-gradient(900px 700px at 40% 120%, rgba(255,122,230,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      overflow-x:hidden;
+    }
+
+    /* animated grain */
+    body:before{
+      content:"";
+      position:fixed; inset:-20%;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+      opacity:.18; pointer-events:none; mix-blend-mode:overlay;
+      animation: drift 18s linear infinite;
+      transform:translateZ(0);
+    }
+    @keyframes drift{from{transform:translate3d(-2%,-2%,0)}to{transform:translate3d(2%,2%,0)}}
+
+    a{color:var(--pink3); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Cover */
+    .cover{
+      position:fixed; inset:0;
+      display:grid; place-items:center;
+      padding: 18px;
+      z-index: 50;
+      background:
+        radial-gradient(900px 500px at 30% 20%, rgba(255,79,216,.18), transparent 65%),
+        radial-gradient(900px 500px at 80% 35%, rgba(255,43,183,.16), transparent 65%),
+        linear-gradient(180deg, rgba(7,7,12,.98), rgba(7,7,12,.92));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: opacity .45s ease, transform .45s ease;
+    }
+    .cover.hide{
+      opacity:0;
+      transform: translateY(-8px) scale(.985);
+      pointer-events:none;
+    }
+    .cover-card{
+      width:min(980px, 100%);
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      box-shadow: 0 25px 90px rgba(0,0,0,.55);
+      overflow:hidden;
+      position:relative;
+    }
+    .cover-hero{
+      padding: 22px 18px 16px;
+      display:grid;
+      gap: 14px;
+    }
+    .cover-top{
+      display:flex; align-items:center; gap:12px;
+    }
+    .logo{
+      width:54px; height:54px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,79,216,.45), rgba(255,79,216,.10) 55%, rgba(255,255,255,.04) 75%);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 12px 40px rgba(255,79,216,.18);
+      display:grid; place-items:center;
+      overflow:hidden;
+      flex: 0 0 auto;
+    }
+    .cover h1{
+      margin:0;
+      font-size: 22px;
+      letter-spacing:.2px;
+      line-height:1.05;
+    }
+    .cover p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size: 13.5px;
+    }
+    .cover-badges{
+      display:flex; gap:8px; flex-wrap:wrap;
+      align-items:center;
+    }
+    .badge{
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      color: #ffe6f8;
+    }
+    .badge.pink{
+      border-color: rgba(255,79,216,.30);
+      background: rgba(255,79,216,.12);
+      color:#ffd8f4;
+    }
+    .cover-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      padding: 0 18px 18px;
+    }
+
+    /* Header + layout */
+    header{
+      position:sticky;
+      top:0;
+      z-index: 10;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: linear-gradient(180deg, rgba(7,7,12,.85), rgba(7,7,12,.30));
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .header-inner{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      gap: 12px;
+    }
+    .title{
+      line-height:1.05;
+      display:flex;
+      flex-direction:column;
+      gap: 3px;
+      min-width:0;
+    }
+    .title h2{
+      font-size: 18px;
+      margin:0;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .title p{
+      margin:0;
+      font-size: 12px;
+      color: var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .pill{
+      margin-left:auto;
+      display:flex; gap:8px; align-items:center;
+      padding: 9px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 35px rgba(0,0,0,.25);
+    }
+    .pill .dot{
+      width:9px; height:9px; border-radius:99px;
+      background: var(--pink);
+      box-shadow: 0 0 0 6px rgba(255,79,216,.15);
+    }
+    .pill span{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 18px 16px 30px;
+      padding-bottom: max(30px, env(safe-area-inset-bottom));
+    }
+
+    .hero{
+      margin-top: 14px;
+      border-radius: var(--radius);
+      padding: 16px 16px 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:after{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(600px 250px at 10% 10%, rgba(255,79,216,.18), transparent 60%),
+        radial-gradient(500px 260px at 90% 15%, rgba(255,43,183,.14), transparent 60%),
+        radial-gradient(700px 260px at 60% 120%, rgba(255,122,230,.10), transparent 60%);
+      pointer-events:none;
+    }
+    .hero > *{ position:relative; }
+    .hero h3{
+      margin:0 0 8px;
+      font-size: 18px;
+      letter-spacing:.2px;
+    }
+    .hero p{
+      margin:0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height:1.45;
+    }
+    .hero .callout{
+      margin-top: 10px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255,79,216,.08);
+      border: 1px solid rgba(255,79,216,.18);
+    }
+    .hero .callout b{ color: var(--text); }
+    .hero .callout .badge2{
+      flex:0 0 auto;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      font-size: 11px;
+      color: var(--pink3);
+      line-height:1;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .panel{
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.18);
+    }
+    .panel-head h4{
+      margin:0;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: .35px;
+      text-transform: uppercase;
+    }
+    .controls{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--text);
+      font-size: 13px;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover{ background: rgba(255,255,255,.07); }
+    .btn:active{ transform: translateY(1px) scale(.99); }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(255,79,216,.25), rgba(255,79,216,.10));
+      border-color: rgba(255,79,216,.32);
+      box-shadow: 0 12px 34px rgba(255,79,216,.14);
+    }
+    .btn.primary:hover{
+      background: linear-gradient(180deg, rgba(255,79,216,.30), rgba(255,79,216,.12));
+    }
+    .btn svg{ width:16px; height:16px; }
+
+    .progress{
+      height: 10px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      width: min(220px, 40vw);
+    }
+    .progress > div{
+      height:100%;
+      width: 20%;
+      background: linear-gradient(90deg, var(--pink2), var(--pink3));
+      border-radius: 99px;
+      transition: width .35s ease;
+    }
+
+    .stage{
+      position:relative;
+      min-height: 62vh;
+      padding: 14px;
+    }
+    .card{
+      position:absolute;
+      inset: 14px;
+      border-radius: calc(var(--radius) - 6px);
+      background: linear-gradient(180deg, rgba(15,15,24,.78), rgba(18,18,37,.66));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 60px rgba(0,0,0,.50);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      opacity: 1;
+    }
+    .card-inner{
+      padding: 16px 14px 14px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,79,216,.45) rgba(255,255,255,.06);
+    }
+    .tagrow{
+      display:flex; gap:8px; flex-wrap:wrap;
+      align-items:center;
+      margin-bottom: 10px;
+    }
+    .tag{
+      font-size: 11px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+    }
+    .tag.pink{
+      color: #ffd8f4;
+      border-color: rgba(255,79,216,.28);
+      background: rgba(255,79,216,.10);
+    }
+    .card h5{
+      margin: 4px 0 10px;
+      font-size: 18px;
+      letter-spacing:.2px;
+    }
+    .poem{
+      font-size: 14px;
+      line-height: 1.6;
+      color: #f2f2ff;
+      white-space: pre-wrap;
+    }
+
+    /* Media embed */
+    .mediaBlock{
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,79,216,.22);
+      background: rgba(255,79,216,.06);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .mediaGrid{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .thumb{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      cursor:pointer;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .thumb:hover{ background: rgba(255,255,255,.04); }
+    .thumb:active{ transform: translateY(1px); }
+    .thumb img{
+      width: 72px; height: 72px;
+      object-fit: cover;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 12px 34px rgba(0,0,0,.35);
+      flex:0 0 auto;
+    }
+    .thumb .ttext b{ display:block; color:#ffd8f4; margin-bottom:4px; }
+    .thumb .ttext small{ display:block; color:var(--muted); line-height:1.35; }
+
+    video{
+      width:100%;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+    }
+
+    /* Card animations */
+    .enter-right{ animation: enterRight .38s ease both; }
+    .enter-left{ animation: enterLeft .38s ease both; }
+    .exit-left{ animation: exitLeft .30s ease both; }
+    .exit-right{ animation: exitRight .30s ease both; }
+    @keyframes enterRight{ from{ transform: translateX(18px); opacity:0; filter: blur(2px); } to{ transform: translateX(0); opacity:1; filter: blur(0);} }
+    @keyframes enterLeft{ from{ transform: translateX(-18px); opacity:0; filter: blur(2px);} to{ transform: translateX(0); opacity:1; filter: blur(0);} }
+    @keyframes exitLeft{ from{ transform: translateX(0); opacity:1;} to{ transform: translateX(-18px); opacity:0;} }
+    @keyframes exitRight{ from{ transform: translateX(0); opacity:1;} to{ transform: translateX(18px); opacity:0;} }
+
+    /* Timeline */
+    .timeline{ padding: 10px; }
+    .tlist{ display:grid; gap: 10px; padding:12px; }
+    .titem{
+      display:flex; gap:10px; align-items:flex-start;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      cursor:pointer;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      user-select:none; -webkit-tap-highlight-color: transparent;
+    }
+    .titem:hover{ background: rgba(255,255,255,.045); }
+    .titem:active{ transform: translateY(1px); }
+    .titem.active{
+      border-color: rgba(255,79,216,.35);
+      background: rgba(255,79,216,.08);
+    }
+    .tbadge{
+      width: 38px; height: 38px;
+      border-radius: 14px;
+      display:grid; place-items:center;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      flex:0 0 auto;
+      position:relative;
+      overflow:hidden;
+    }
+    .tbadge:before{
+      content:"";
+      position:absolute; inset:-30%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,79,216,.35), transparent 60%);
+      transform: rotate(18deg);
+    }
+    .tbadge span{ position:relative; font-weight:700; font-size: 12px; color: #ffe6f8; }
+    .tmeta{ min-width:0; }
+    .tmeta b{
+      display:block; font-size: 13px; margin-bottom: 3px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .tmeta small{
+      color: var(--muted); font-size: 12px; display:block;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+
+    @media (min-width: 860px){
+      .grid{ grid-template-columns: 1.05fr .70fr; align-items:start; }
+      .stage{ min-height: 68vh; }
+      .timeline{ position: sticky; top: 84px; }
+      .progress{ width: 260px; }
+      .title h2{ font-size: 20px; }
+      .mediaGrid{ grid-template-columns: 1fr; }
+    }
+
+    footer{
+      margin-top: 14px;
+      color: rgba(184,184,214,.85);
+      font-size: 12px;
+      text-align:center;
+      padding: 10px 8px 2px;
+    }
+
+    /* Toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom: 18px;
+      transform:translateX(-50%);
+      background: rgba(15,15,24,.88);
+      border: 1px solid rgba(255,255,255,.10);
+      padding: 10px 12px;
+      border-radius: 16px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      color: var(--text);
+      font-size: 13px;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .2s ease, transform .2s ease;
+      max-width: min(520px, calc(100vw - 24px));
+      display:flex; gap:10px; align-items:flex-start;
+      z-index: 60;
+    }
+    .toast.show{ opacity:1; transform:translateX(-50%) translateY(-4px); }
+    .toast .spark{
+      width:10px; height:10px; border-radius:99px; margin-top:3px;
+      background: var(--pink);
+      box-shadow: 0 0 0 6px rgba(255,79,216,.14);
+      flex: 0 0 auto;
+    }
+
+    /* Lightbox */
+    .lightbox{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.70);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display:none;
+      align-items:center; justify-content:center;
+      padding: 16px;
+      z-index: 70;
+    }
+    .lightbox.show{ display:flex; }
+    .lightbox-inner{
+      width:min(980px, 100%);
+      border-radius: 22px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(10,10,16,.55);
+      box-shadow: 0 30px 100px rgba(0,0,0,.65);
+      position:relative;
+    }
+    .lightbox-top{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.25);
+      gap:10px;
+    }
+    .lightbox-top b{ color:#ffd8f4; font-size: 13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .lightbox-content{ padding: 12px; }
+    .lightbox-content img{
+      width:100%; height:auto;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background:#000;
+      display:block;
+    }
+
+    /* Confetti canvas */
+    #confettiCanvas{
+      position:fixed; inset:0;
+      pointer-events:none;
+      z-index: 65;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Cover -->
+<section class="cover" id="cover" aria-label="Cover">
+  <div class="cover-card">
+    <div class="cover-hero">
+      <div class="cover-top">
+        <div class="logo" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SemmelSiggi Logo">
+            <path d="M14 2C8.477 2 4 6.477 4 12c0 6.9 8.2 13.5 10 14 1.8-.5 10-7.1 10-14C24 6.477 19.523 2 14 2Z" fill="url(#g)"/>
+            <path d="M8.2 12.1c2.2 1 4.1.2 5.8-1.7 1.7 1.9 3.6 2.7 5.8 1.7" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="11.2" cy="11" r="1.2" fill="rgba(10,10,16,.85)"/>
+            <circle cx="16.8" cy="11" r="1.2" fill="rgba(10,10,16,.85)"/>
+            <defs>
+              <linearGradient id="g" x1="4" y1="2" x2="24" y2="26" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#FF4FD8"/>
+                <stop offset="1" stop-color="#FF7AE6"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div style="min-width:0">
+          <h1>SemmelSiggi und der Weihnachtsstreak</h1>
+          <p>Das Archiv ab Tag 12 — mit Bildern, Video, Timeline, Swipe & Finale-Konfetti.</p>
+        </div>
+      </div>
+
+      <div class="cover-badges">
+        <span class="badge pink">Schwarz / Rosa</span>
+        <span class="badge">Swipe ↔</span>
+        <span class="badge">Timeline</span>
+        <span class="badge">Konfetti bei Tag 22</span>
+      </div>
+
+      <p>
+        Plot-Twist: Das insgeheime Ziel war anfangs nicht klar. Der Autor dachte erst an <b>31 Tage</b> —
+        im Hintergrund flackerte <b>24</b> — und am Ende gewinnt trotzdem: <b>der Mensch</b>.
+      </p>
+    </div>
+
+    <div class="cover-actions">
+      <button class="btn primary" id="btnStart">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        Start reading
+      </button>
+      <button class="btn" id="btnCoverScroll">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 14l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Direkt zu Tag 12
+      </button>
+      <span style="color:var(--muted); font-size:12px">Tip: Dateien müssen im selben Ordner liegen.</span>
+    </div>
+  </div>
+</section>
+
+<canvas id="confettiCanvas"></canvas>
+
+<header>
+  <div class="header-inner">
+    <div class="logo" aria-hidden="true" style="width:44px;height:44px;border-radius:16px">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SemmelSiggi Logo">
+        <path d="M14 2C8.477 2 4 6.477 4 12c0 6.9 8.2 13.5 10 14 1.8-.5 10-7.1 10-14C24 6.477 19.523 2 14 2Z" fill="url(#g2)"/>
+        <path d="M8.2 12.1c2.2 1 4.1.2 5.8-1.7 1.7 1.9 3.6 2.7 5.8 1.7" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="11.2" cy="11" r="1.2" fill="rgba(10,10,16,.85)"/>
+        <circle cx="16.8" cy="11" r="1.2" fill="rgba(10,10,16,.85)"/>
+        <defs>
+          <linearGradient id="g2" x1="4" y1="2" x2="24" y2="26" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#FF4FD8"/>
+            <stop offset="1" stop-color="#FF7AE6"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="title">
+      <h2>SemmelSiggi und der Weihnachtsstreak</h2>
+      <p>Alle Texte ab Tag 12 – zum Blättern, Swipen & Genießen.</p>
+    </div>
+
+    <div class="pill" title="Streak-Archiv">
+      <div class="dot"></div>
+      <span id="pillLabel">Tag 12–22</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="hero">
+    <h3>🎄 Das Archiv der Kilometer-Poesie</h3>
+    <p>
+      Ein Dezember, der nicht zählt – sondern fordert. Und irgendwo zwischen Stirnlampe, Bachringel und Bratensaft
+      wurde aus „nur kurz laufen“ eine Saga.
+    </p>
+    <div class="callout">
+      <div class="badge2">Plot-Twist</div>
+      <div>
+        <b>Das insgeheime Ziel war anfangs noch nicht klar.</b><br/>
+        Der Autor dachte erst: <b>31 Tage</b>… dabei schimmerte im Hintergrund schon die <b>24-Tage-Idee</b> – und am Ende wurde’s ganz anders: <b>Tag 22</b> als würdiger Schlussakkord.
+      </div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="panel">
+      <div class="panel-head">
+        <h4>Blättern</h4>
+        <div class="controls">
+          <button class="btn" id="btnPrev" aria-label="Vorheriger Tag">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Zurück
+          </button>
+          <button class="btn primary" id="btnNext" aria-label="Nächster Tag">
+            Weiter
+            <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="progress" aria-label="Fortschritt"><div id="progressBar"></div></div>
+        </div>
+      </div>
+
+      <div class="stage" id="stage" aria-live="polite"></div>
+    </div>
+
+    <aside class="panel timeline" aria-label="Timeline">
+      <div class="panel-head">
+        <h4>Timeline</h4>
+        <div class="controls">
+          <button class="btn" id="btnShare" title="Seite teilen">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M16 8a3 3 0 10-2.83-4H13a3 3 0 003 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6 14a3 3 0 10-2.83-4H3a3 3 0 003 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M16 20a3 3 0 10-2.83-4H13a3 3 0 003 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M8.7 12.7l6.6 3.6M15.3 7.7l-6.6 3.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Share
+          </button>
+        </div>
+      </div>
+      <div class="tlist" id="timelineList"></div>
+    </aside>
+  </section>
+
+  <footer>
+    Schwarz/Rosa • SemmelSiggi-Vibes • Tip: <b>Swipe</b> links/rechts auf dem Text.
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <div class="spark"></div>
+  <div id="toastMsg">Kopiert!</div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <div class="lightbox-inner" role="dialog" aria-modal="true" aria-label="Bild Vorschau">
+    <div class="lightbox-top">
+      <b id="lightboxTitle">Bild</b>
+      <button class="btn" id="btnLightboxClose">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Schließen
+      </button>
+    </div>
+    <div class="lightbox-content">
+      <img id="lightboxImg" alt="Vorschau" />
+    </div>
+  </div>
+</div>
+
+<script>
+  // Datei-Namen (müssen im gleichen Ordner liegen)
+  const ASSETS = {
+    video: "SemmelSiggi-Lauf-Video.mp4",
+    trikot: "SemmelSiggi-Trikot.jpeg",
+    action: "SemmelSiggi-ActionFigur.jpeg",
+    hulk_pf: "SemmelSiggi-Hulk-Pfannkuchen.jpeg",
+    hulk_brot: "SemmelSiggi-Hulk-Brötchen.jpeg",
+  };
+
+  const entries = [
+    {
+      day: "12",
+      title: "DER SEMMEL-SIGGI 🚀",
+      subtitle: "Wer semmmelt so spät am Brückenenringel…",
+      tags: ["Poetry", "Zwift", "Semmel-Drama"],
+      poem:
+`DER SEMMEL-SIGGI 🚀
+
+Wer semmmelt so spät am Brückenenringel seine Runden?
+
+Das Heimatlight um seinen Kopf gebunden. 
+
+Schnellen Schrittes rauscht vorbei,
+Zeit genutzt, denn Brötchen werden wohl im Herd backen?
+
+Er erreicht den Hof mit Müh und Not,
+Die Brötchen schwarz und tot gebacken.
+
+Er denkt sich das muss besser gehn, das werden wir dann morgen sehn.
+
+Er wird wohl schneller laufen müssen, sonst bekommt er das mit den Semmeln nicht mehr geschissen. 
+
+Damit soll es das fast gewesen sein.
+
+Mit einem Gläschen Wein, haut SemnelSiggi auf Zwift noch in die Pedale rein. 
+Die Beine müssen locker werden, für morgen, wir wollen doch kein weiteres 
+Brötchen sterben.
+
+In diesen Sinne...
+Nur noch 20 Tage`,
+      media: {
+        type: "Video",
+        note: "Der Lauf-Moment als eingebettetes Video.",
+        videoSrc: ASSETS.video
+      }
+    },
+    {
+      day: "13",
+      title: "SemmelSiggi #13",
+      subtitle: "Die 13 – im Radsport dreht man sie zur Sicherheit um.",
+      tags: ["Aberglaube", "Radsport", "Streak-Schutzschild"],
+      poem:
+`SemmelSiggi #13
+
+Die 13. für die Abergläubischen negativ behaftet. 
+Vorallem, wenn es als Tag auf einen Fr. fällt. 
+Zum Glück haben wir heute Samstag, kein Grund zur Sorge.
+Sicherheitshalber haben wir aber wie im Radsport üblich die 13 auf den Kopf gedreht. 
+Nur keine Gefahr aufkommen lassen, dass der Streak meinen auch nur klotzen kleinen reißen zu können.
+Für unseren auf Semmeln laufenden Siggi, ist die 13 somit nur ein weiterer Strich im Kalender...`,
+      media: {
+        type: "Bild",
+        note: "Das Trikot – passend zur #13 (auf den Kopf gedreht!).",
+        images: [{ src: ASSETS.trikot, title: "SemmelSiggi Trikot (#13)" }]
+      }
+    },
+    {
+      day: "14",
+      title: "SemmelSiggi #14 – Lauf, Siggi, lauf.",
+      subtitle: "Dritter Advent. Andere zünden Kerzen an – Siggi zündet Waden an.",
+      tags: ["Advent", "Bachringel", "Disziplin"],
+      poem:
+`SemmelSiggi #14 - Lauf, Siggi, lauf.
+
+Dezember.
+Kalter Atem, warme Beine.
+Ein Kalender, der nicht zählt,
+sondern fordert.
+
+Tag eins: ein Kilometer –
+mehr Versprechen als Strecke.
+Tag zwei: zwei Kilometer –
+der Bach Ringel hört schon zu.
+Tag drei: drei –
+und plötzlich wird aus „Ich geh kurz“ ein Ritual.
+
+Und so wächst der Weg,
+Tag für Tag,
+Kilometer für Kilometer,
+wie Adventskerzen aus Asphalt.
+
+Heute: Tag vierzehn.
+Vierzehn Kilometer Mut.
+Vierzehn Kilometer Trotz.
+Vierzehn Kilometer SemmelSiggi.
+
+Er rennt nicht einfach –
+er zieht Kreise,
+Runden am Bach Ringel,
+immer wieder,
+als würde er dem Wasser erzählen:
+„Ich bleib dran. Auch morgen.“
+
+Dritter Advent heute.
+Andere zünden Kerzen an,
+Siggi zündet Waden an.
+Während irgendwo Vanillekipferl zerbröseln,
+zerbröselt er Ausreden.
+
+Sonntagmorgen.
+Bäckerei geschlossen.
+Brötchen? Fehlanzeige.
+Nicht aus Faulheit –
+nein.
+Aus Streak-Treue.
+
+SemmelSiggi sagt:
+„Ich laufe.“
+Der Teig sagt:
+„Dann bleib ich liegen.“
+
+Und Lars.
+Chicky.
+Hungrig.
+Enttäuscht.
+Er schaut auf den leeren Frühstückstisch
+und denkt sich:
+„Europa hat fertig.“
+
+Jetzt heißt es:
+Abflug nach Taiwan,
+weil irgendwer ja mal wieder
+was Richtiges essen muss,
+wenn der Bäcker lieber Kilometer knetet
+als Brötchen.
+
+Und irgendwo zwischen Kilometer vierzehn
+und Zimtsternen ohne Zimt
+kommt die Eilmeldung:
+
+Lars Krismes verhaftet!
+Nicht im Gefängnis aus Stahl,
+sondern im Verlies Navidad.
+
+Denn während andere Weihnachten feiern,
+sitzt SemmelSiggi freiwillig ein –
+eingesperrt im eigenen Dezember-Deal.
+Jeden Tag ein Kilometer mehr.
+Keine Gnade.
+Keine Pause.
+
+Der wahre Knast?
+Das sind nicht Gitter.
+Das ist Disziplin.
+
+Und trotzdem:
+Er läuft.
+Mit einem Grinsen.
+Mit leeren Brötchenkörben
+und vollen Schuhen.
+
+Noch siebzehn Tage bis zum Einunddreißigsten.
+Noch siebzehn Kapitel dieses Laufs.
+
+Der Bach Ringel weiß es längst:
+Das hier ist kein Training.
+Das ist eine Geschichte.
+Und SemmelSiggi
+schreibt sie
+Schritt
+für
+Schritt. 🏃‍♂️✨`
+    },
+    {
+      day: "15",
+      title: "SemmelSiggi #15 – Halbzeit?",
+      subtitle: "Halbzeit im Kopf – nicht in den Beinen.",
+      tags: ["Mathe-Realität", "Arbeitsweg", "Döner-Waffe"],
+      poem:
+`SemmelSiggi #15 - Halbzeit? 
+
+Tag fünfzehn.
+Halbzeit, sagt der Kalender.
+Ja, nach Tagen stimmt das – fair genug.
+Doch die Kilometer lachen leise:
+Von 496 insgesamt
+sind erst 120 gelaufen.
+Heißt: 376 Kilometer stehen noch da
+wie ein Berg, der grinst und sagt:
+„Na, komm schon.“
+
+Heute keine Runden am Bachringel,
+das Wasser dort ist inzwischen durchgezählt,
+jeder Tropfen kennt seinen Namen.
+Also neue Wege.
+Arbeitsweg statt Uferlauf.
+Asphalt statt Bachrauschen.
+Routine wird gebrochen,
+der Streak bleibt standhaft.
+
+Und irgendwo zwischen Schritt und Atem
+stellt sich die große Frage:
+Bleibt die Semmel,
+oder wird der Döner
+zur geheimen Waffe?
+Knoblauchsoße gegen Muskelkater,
+Kalbfleisch als Motivation.
+
+Tag 15.
+Halbzeit im Kopf,
+nicht in den Beinen.
+SemmelSiggi läuft weiter.`
+    },
+    {
+      day: "16",
+      title: "SemmelSiggi #16 – Die frühe Semmel",
+      subtitle: "5 Uhr morgens. Der Wecker diskutiert nicht.",
+      tags: ["5 Uhr", "Zeitmanagement", "Wille hellwach"],
+      poem:
+`SemmelSiggi #16 - Die frühe Semmel
+
+Tag sechzehn.
+Zeit ist jetzt keine Uhr mehr,
+Zeit ist ein Trainingspartner.
+
+Fünf Uhr morgens.
+Die Stadt gähnt noch,
+der Wecker diskutiert nicht,
+der Streak schon gar nicht.
+
+Strammer Schritt Richtung Arbeit,
+der Asphalt kennt den Plan.
+Zwischen Schlaf und Schicht
+liegt ein Versprechen aus Schweiß.
+
+Zeitmanagement heißt heute:
+erst laufen, dann leisten.
+Denn wer den Streak nicht ehrt,
+ist die Arbeit nicht wert –
+oder so ähnlich,
+aber du weißt genau:
+SemmelSiggi meint es ernst.
+
+Tag 16.
+Noch dunkel.
+Aber der Wille
+ist schon hellwach.`
+    },
+    {
+      day: "17",
+      title: "SemmelSiggi #17 – siebzehn Jahr, blondes Haar",
+      subtitle: "Früher Kaffee. Heute: Malto.",
+      tags: ["Udo-Vibes", "Maltodextrin", "Vorwärts im Takt"],
+      poem:
+`SemmelSiggi #17 – siebzehn Jahr, blondes Haar
+
+Tag siebzehn.
+Siebzehn Kilometer Gedanken,
+siebzehn Gründe weiterzumachen.
+
+🎶 Siebzehn Jahr, blondes Haar… 🎶
+Udo summt aus der Ferne,
+und ja – blondes Haar,
+das hat unser SemmelSiggi wirklich.
+Im Spiegel vielleicht ein paar Jahre mehr,
+im Kopf?
+Noch mal siebzehn, mindestens.
+
+Er wünscht sich Zeit zurück,
+nicht um langsamer zu sein –
+sondern um sie noch mal
+so konsequent zu verbrennen.
+
+Früher: Kaffee.
+Schwarz. Stark.
+Heute: Malto. Maltodextrin.
+Pulver statt Pause,
+Energie zum Anrühren,
+das neue Lebenselixier im Becher.
+
+Der Lauf läuft.
+Der Streak spricht.
+Und irgendwo zwischen Atem und Asphalt
+denkt sich SemmelSiggi:
+Wenn siebzehn sich so anfühlt –
+dann darf es ruhig noch
+ein paar Tage mehr sein.
+
+Tag 17.
+Blondes Haar.
+Kein Zurückspulen –
+nur vorwärts im Takt.`
+    },
+    {
+      day: "18",
+      title: "SemmelSiggi #18 – Superkraft?",
+      subtitle: "Semmel-zu-Schubkraft-Umwandlung. Krümel rein, Kilometer raus.",
+      tags: ["Superkraft", "Malto", "Zeitkrümmung"],
+      poem:
+`SemmelSiggis #18 - Superkraft?
+
+🚀 Die unendliche Streak-Energie.
+
+Sie setzt sich aus drei legendären Fähigkeiten zusammen:
+
+1. Semmel-zu-Schubkraft-Umwandlung
+Egal ob Frühstück verpasst oder Döner als Geheimwaffe – SemmelSiggi kann jedes Gebäck in Vortrieb verwandeln. Krümel rein, Kilometer raus.
+
+
+2. Maltodextrin-Manipulation
+Wo andere Wasser trinken, zapft er direkt den reinen Treibstoff des Lebens. Ein Schluck – zack – Puls stabil, Beine leergefegt von Zweifel.
+
+
+3. Zeitkrümmung bei Müdigkeit
+5 Uhr morgens? Für normale Menschen unmenschlich.
+Für SemmelSiggi nur eine andere Zeitzone im Laufstreak-Multiversum.
+
+Sein Superhelden Spruch: "Wer den Streak nicht ehrt, ist die Semmel nicht Wert."`,
+      media: {
+        type: "Bild",
+        note: "Die Action-Figur — inkl. Malto-Accessoires.",
+        images: [{ src: ASSETS.action, title: "SemmelSiggi Action Figur" }]
+      }
+    },
+    {
+      day: "19",
+      title: "SemmelSiggi #19 – Hulk!",
+      subtitle: "Pokémon-Evolution: SemmelSiggi-Hulk.",
+      tags: ["Pokémon-Evo", "Hulk-Mode", "Energie"],
+      poem:
+`SemmelSiggi #19 - Hulk! 
+
+Ab morgen steht eine 2 vorn. Unfassbar! Dass heißt die Läufe werden länger. Energie wird immer wichtiger. Diese soll unserem SemmelSiggi nicht ausgehen.
+Da unser SemmelSiggi insgeheim ein Pokémon ist, hat er sich in den SemmelSiggi - Hulk weiterentwickelt. Seht selbst.
+
+https://shorturl.at/CIZjc
+
+Ein bisschen knobeln muss, aber jeder selbst 😜`,
+      media: {
+        type: "Bilder",
+        note: "Hulk-Varianten — einmal süß, einmal herzhaft (Semmel-Edition).",
+        images: [
+          { src: ASSETS.hulk_pf, title: "SemmelSiggi Hulk – Pfannkuchen" },
+          { src: ASSETS.hulk_brot, title: "SemmelSiggi Hulk – Brötchen" }
+        ]
+      }
+    },
+    {
+      day: "20",
+      title: "SemmelSiggi #20 – Chuck Norris",
+      subtitle: "Chuck Norris wischt sich still eine Träne aus dem Bart.",
+      tags: ["Legende", "Dezember", "Respekt"],
+      poem:
+`SemmelSiggi #20 - Chuck Norris 
+
+Chuck Norris schaut selten hin.
+Aber wenn er es tut,
+bekommt er feuchte Augen.
+
+Nicht wegen Zwiebeln.
+Nicht wegen Glühwein.
+
+Sondern weil SemmelSiggi
+Tag für Tag
+die Kilometer nieder­ringt,
+als wären sie schlechte Ausreden.
+
+Chuck Norris kämpft gegen Legenden.
+SemmelSiggi gegen den Dezember.
+
+Und irgendwo am Streckenrand
+wischt sich Chuck Norris
+still eine Träne aus dem Bart
+und murmelt:
+„Respekt.“`
+    },
+    {
+      day: "21",
+      title: "SemmelSiggi #21 – Rückkehr zum Bachringel",
+      subtitle: "Manchmal ist Fortschritt: Rückkehr zum Bewährten.",
+      tags: ["Bachringel", "Routine", "Alles für die Semmel"],
+      poem:
+`SemmelSiggi #21 – Rückkehr zum Bachringel
+
+Stumpfes Trumpf.
+Nicht glänzend, nicht neu –
+aber verlässlich wie der erste Schritt vor der Haustür.
+
+Zurück zu alten Mustern,
+zurück zum Bachringel,
+wo jede Kurve den Namen kennt
+und der Untergrund sagt: „Dich hab ich vermisst.“
+
+Die großen Experimente?
+Arbeitsweg-Ausflüge,
+mit Bonuslevel kalte Dusche.
+Abgehakt.
+Als „charakterbildend“ abgespeichert,
+aber sportlich… sagen wir: ausbaufähig.
+
+Also wieder Kreis statt Chaos,
+Routine statt Abenteuer,
+manchmal ist Fortschritt
+einfach die Rückkehr zum Bewährten.
+
+Früher hieß es:
+Alles für den Dackel. Alles für den Hund.
+
+Heute heißt es:
+Alles für die Semmel.
+
+Und die Semmel?
+Die will keine Ausreden,
+keine Umwege,
+sie will Kilometer.
+Still. Hartnäckig.
+Tag 21.`
+    },
+    {
+      day: "22",
+      title: "Tag 22 – Over and out",
+      subtitle: "Kein kompletter Streak. Und trotzdem kein Scheitern.",
+      tags: ["Abbruch", "241 km", "Fuchs-Weisheit"],
+      poem:
+`Tag 22 
+
+SemmelSiggi meldet sich zu Wort: 
+
+Tag 22 over and out
+Vom 1.12 mit 1 km gestartet, bis zum 22.12 mit geplanten 22 km – am Ende wurden es 241 km in drei Wochen.
+Es ging schon holprig los heute, Schmerzen im rechten Sprunggelenk, nach 5 km Schuhe gewechselt – kurz besser, aber nicht wirklich gut. Mit jedem weiteren Kilometer wurde es zäher, heute im 12. von geplanten 22 km dann der Abbruch.
+
+Kein kompletter Streak. Und trotzdem kein Scheitern.
+Oder wie ein lieber Freund immer sagt: „Interessiert doch einen alten Fuchs.“
+
+Es hat Spaß gemacht, ich habe viel mitgenommen – und auf den Körper zu hören gehört eben auch dazu.
+Ein riesiges Danke an meine Familie, die mir die Zeit und den Rücken für diese 241 km freigehalten hat.
+Und Danke an Jörg für die tägliche Poesie, Motivation und Unterstützung.
+
+Der Streak endet hier – die Lust am Laufen nicht. 🦊🏃‍♂️`,
+      extra: {
+        title: "Bonus: SemmelSiggi #22 – Die Gans (inoffiziell 😅)",
+        text:
+`Heiligabend rückt näher,
+der Kalender riecht nach Kerzenwachs und Zeitmangel.
+Der Streak?
+Er schaut schon mal vorsichtig über die Ziellinie,
+als wolle er fragen:
+„War’s das bald?“
+
+Doch vorher noch:
+Gänse wollen gebraten werden.
+Nicht metaphorisch.
+Echt. Mit Verantwortung.
+Und plötzlich ist jede Minute
+so knapp wie der Platz im Ofen.
+
+Die Laufschuhe stehen bereit,
+aber die Uhr tickt lauter als der Puls.
+Familie, Einkauf, Vorbereitung,
+der Dezember zieht an wie ein Endspurt,
+den niemand offiziell ausgerufen hat.
+
+Und dann kommt sie daher,
+die Wintersonnenwende,
+mit ihrem großen kosmischen Versprechen:
+Ab jetzt wird’s wieder heller.
+Schön.
+Hilft aber auch nicht,
+wenn der Tag trotzdem zu kurz ist
+für Lauf, Gans und Ruhepuls.
+
+SemmelSiggi läuft trotzdem.
+Nicht gegen die Zeit,
+sondern mit ihr.
+Zwischen Bratensaft und Stirnlampe,
+zwischen Pflicht und Prinzip.
+
+Tag 22.
+Kein Geschenkpapier,
+kein Glanz.
+Nur Konsequenz.
+Und der leise Gedanke:
+Wenn selbst die Sonne umdreht,
+kann Aufhören keine Option sein.`
+      },
+      final: {
+        title: "Finale – aus Sicht des Streaks",
+        text:
+`Ich bin der Streak.
+
+Ich kam leise.
+Am ersten Dezember,
+ein Kilometer groß, kaum hörbar,
+mehr Idee als Verpflichtung.
+
+Ich wuchs mit jedem Morgen,
+mit jedem Wecker um fünf,
+mit jedem Schritt am Bachringel,
+mit kalter Luft, warmem Trotz
+und Semmeln, die sonntags liegen blieben.
+
+Ich war Zahl und Versuchung.
+Ich war Regel.
+Ich war das Flüstern: „Zieh durch.“
+Und manchmal auch das Brüllen: „Noch einen.“
+
+Warum hat er mich begonnen?
+War es Disziplin?
+War es Flucht?
+Oder einfach diese leise Hoffnung,
+sich selbst noch mal zu begegnen
+zwischen Glühweinstand, Arbeitsweg
+und einer Welt, die im Dezember
+immer ein bisschen schneller dreht?
+
+Wir haben gelacht.
+Über Chuck Norris.
+Über Döner als Geheimwaffe.
+Über alles für die Semmel.
+Wir haben uns verglichen,
+haben pathetisch getan
+und wussten doch:
+Es ging nie um mich allein.
+
+Ich habe ihn gefordert.
+Ich habe gezerrt.
+Und am zweiundzwanzigsten Tag
+habe ich verloren.
+
+Zwölf Kilometer.
+Ein rechter Sprunggelenk, der Nein sagte.
+Schuhe gewechselt, Hoffnung kurz geliehen,
+aber die Wahrheit blieb standhaft.
+
+Und da stand er.
+SemmelSiggi.
+Und hörte zu.
+
+Nicht auf mich –
+sondern auf seinen Körper.
+
+Und plötzlich war ich es,
+der lernen musste.
+
+Denn was ist ein Streak,
+wenn er den Menschen vergisst?
+Was ist Konsequenz,
+wenn sie taub macht?
+Und was ist Sieg,
+wenn keiner mehr heil ins Ziel kommt?
+
+Er hat mich beendet.
+Nicht aus Schwäche.
+Sondern aus Stärke.
+
+241 Kilometer in drei Wochen.
+Vom 1.12 mit 1 km gestartet,
+bis zum 22.12 mit geplanten 22 km.
+Kein kompletter Streak.
+Und trotzdem kein Scheitern.
+
+Oder wie ein alter Fuchs sagt:
+„Interessiert doch einen toten Hund.“
+
+Er hat mir die Macht genommen
+und mir Sinn gegeben.
+Hat Danke gesagt –
+der Familie,
+die Zeit und Rücken freigehalten hat.
+Und Jörg (der Streak),
+für tägliche Poesie,
+Motivation
+und dieses Dranbleiben,
+auch wenn Worte manchmal mehr tragen
+als Beine.
+
+Seine letzten Worte klingen noch nach,
+auch in mir:
+
+Tag 22 over and out.
+Der Streak endet hier –
+die Lust am Laufen nicht.
+
+Und so stehe ich hier,
+der Streak,
+besiegt
+und doch verstanden.
+
+Denn gewonnen hat nicht die Regel.
+Gewonnen hat der Mensch. 🦊🏃‍♂️`
+      }
+    }
+  ];
+
+  const stage = document.getElementById('stage');
+  const timelineList = document.getElementById('timelineList');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnShare = document.getElementById('btnShare');
+  const progressBar = document.getElementById('progressBar');
+  const pillLabel = document.getElementById('pillLabel');
+
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+
+  const cover = document.getElementById('cover');
+  const btnStart = document.getElementById('btnStart');
+  const btnCoverScroll = document.getElementById('btnCoverScroll');
+
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxTitle = document.getElementById('lightboxTitle');
+  const btnLightboxClose = document.getElementById('btnLightboxClose');
+
+  let idx = 0;
+  let currentCard = null;
+  let touchStartX = null;
+  let touchStartY = null;
+  let confettiDone = false;
+
+  function showToast(msg){
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> toast.classList.remove('show'), 1400);
+  }
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+  function escapeHtml(str){
+    return (str || "").replace(/[&<>"']/g, (m)=>({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  function buildTimeline(){
+    timelineList.innerHTML = "";
+    entries.forEach((e, i)=>{
+      const item = document.createElement('div');
+      item.className = 'titem' + (i===idx ? ' active' : '');
+      item.innerHTML = `
+        <div class="tbadge"><span>${escapeHtml(e.day)}</span></div>
+        <div class="tmeta">
+          <b>${escapeHtml(e.title)}</b>
+          <small>${escapeHtml(e.subtitle || '')}</small>
+        </div>
+      `;
+      item.addEventListener('click', ()=> goTo(i, i>idx ? 'next' : 'prev'));
+      timelineList.appendChild(item);
+    });
+  }
+  function setActiveTimeline(){
+    [...timelineList.querySelectorAll('.titem')].forEach((el, i)=>{
+      el.classList.toggle('active', i===idx);
+    });
+  }
+
+  function makeMediaHtml(e){
+    if(!e.media) return "";
+    const m = e.media;
+    const note = escapeHtml(m.note || "");
+    const type = escapeHtml(m.type || "Media");
+
+    let body = `<div class="mediaBlock" role="note" aria-label="Media">
+      <b style="color:#ffd8f4">${type}</b><br/>${note}`;
+
+    // Video
+    if(m.videoSrc){
+      body += `<div class="mediaGrid" style="margin-top:10px">
+        <video controls preload="metadata">
+          <source src="${m.videoSrc}" type="video/mp4" />
+          Dein Browser kann das Video leider nicht abspielen.
+        </video>
+        <div style="color:var(--muted); font-size:12px; margin-top:4px">
+          Falls das Video nicht lädt: Stelle sicher, dass <b>${m.videoSrc}</b> im selben Ordner liegt.
+        </div>
+      </div>`;
+    }
+
+    // Images
+    if(m.images && m.images.length){
+      body += `<div class="mediaGrid">`;
+      m.images.forEach((img, i)=>{
+        body += `
+          <div class="thumb" data-action="lightbox" data-src="${img.src}" data-title="${escapeHtml(img.title || 'Bild')}">
+            <img src="${img.src}" alt="${escapeHtml(img.title || 'Bild')}"
+              onerror="this.style.opacity=.35; this.title='Datei nicht gefunden: ${img.src}'" />
+            <div class="ttext">
+              <b>${escapeHtml(img.title || 'Bild')}</b>
+              <small>Tippe zum Vergrößern (Lightbox).</small>
+            </div>
+          </div>`;
+      });
+      body += `</div>
+        <div style="color:var(--muted); font-size:12px; margin-top:8px">
+          Wenn Bilder fehlen: Lege die Dateien im gleichen Ordner ab (z.B. <b>${m.images[0].src}</b>).
+        </div>`;
+    }
+
+    body += `</div>`;
+    return body;
+  }
+
+  function makeCard(e){
+    const card = document.createElement('article');
+    card.className = 'card';
+
+    const tags = (e.tags || []).slice(0, 3);
+    const tagsHtml = tags.map((t, j)=> `<span class="tag ${j===0 ? 'pink' : ''}">${escapeHtml(t)}</span>`).join('');
+
+    const extraHtml = e.extra ? `
+      <div class="mediaBlock" style="border-color: rgba(255,79,216,.22); background: rgba(255,255,255,.03)">
+        <b style="color:#ffd8f4">${escapeHtml(e.extra.title)}</b>
+        <div class="poem" style="margin-top:10px">${escapeHtml(e.extra.text)}</div>
+      </div>` : "";
+
+    const finalHtml = e.final ? `
+      <div class="mediaBlock" style="border-color: rgba(255,255,255,.10); background: rgba(0,0,0,.22)">
+        <b style="color:#ffd8f4">${escapeHtml(e.final.title)}</b>
+        <div class="poem" style="margin-top:10px">${escapeHtml(e.final.text)}</div>
+      </div>` : "";
+
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="tagrow">
+          <span class="tag pink">Tag ${escapeHtml(e.day)}</span>
+          ${tagsHtml}
+          <span class="tag" style="margin-left:auto">↔ Swipe</span>
+        </div>
+
+        <h5>${escapeHtml(e.title)}</h5>
+        ${e.subtitle ? `<div style="color:var(--muted); font-size:13px; margin:-2px 0 10px">${escapeHtml(e.subtitle)}</div>` : ""}
+
+        <div class="poem">${escapeHtml(e.poem)}</div>
+
+        <div class="row" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px">
+          <button class="btn" type="button" data-action="copy">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M9 9h10v10H9V9z" stroke="currentColor" stroke-width="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Text kopieren
+          </button>
+          <button class="btn" type="button" data-action="jump" data-jump="timeline">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Timeline
+          </button>
+        </div>
+
+        ${makeMediaHtml(e)}
+        ${extraHtml}
+        ${finalHtml}
+      </div>
+    `;
+
+    // click handlers inside card
+    card.addEventListener('click', async (ev)=>{
+      const btn = ev.target.closest('[data-action]');
+      if(!btn) return;
+      const action = btn.getAttribute('data-action');
+
+      if(action === "copy"){
+        const text = e.poem
+          + (e.extra ? "\n\n" + e.extra.title + "\n\n" + e.extra.text : "")
+          + (e.final ? "\n\n" + e.final.title + "\n\n" + e.final.text : "");
+        try{ await navigator.clipboard.writeText(text); showToast("Text kopiert ✨"); }
+        catch{ showToast("Konnte nicht kopieren (Browser) 😅"); }
+      }
+
+      if(action === "jump"){
+        document.querySelector('.timeline')?.scrollIntoView({behavior:"smooth", block:"start"});
+        showToast("Timeline geöffnet 🧭");
+      }
+
+      if(action === "lightbox"){
+        const src = btn.getAttribute('data-src');
+        const title = btn.getAttribute('data-title') || "Bild";
+        openLightbox(src, title);
+      }
+    });
+
+    return card;
+  }
+
+  function updateProgress(){
+    const pct = ((idx+1) / entries.length) * 100;
+    progressBar.style.width = pct + "%";
+    pillLabel.textContent = `Tag ${entries[idx].day} • Archiv`;
+  }
+
+  function goTo(nextIdx, direction){
+    nextIdx = clamp(nextIdx, 0, entries.length-1);
+    if(nextIdx === idx) return;
+
+    const old = currentCard;
+    const next = makeCard(entries[nextIdx]);
+
+    if(old){
+      old.classList.remove('enter-left','enter-right');
+      old.classList.add(direction === 'next' ? 'exit-left' : 'exit-right');
+      old.addEventListener('animationend', ()=> old.remove(), { once:true });
+    }
+
+    next.classList.add(direction === 'next' ? 'enter-right' : 'enter-left');
+    stage.appendChild(next);
+    currentCard = next;
+    idx = nextIdx;
+
+    setActiveTimeline();
+    updateProgress();
+
+    // Confetti when reaching last entry (Tag 22)
+    if(idx === entries.length - 1 && !confettiDone){
+      confettiDone = true;
+      launchConfetti();
+      showToast("Tag 22 erreicht — over and out 🎉");
+    }
+  }
+
+  // Cover controls
+  function hideCover(){
+    cover.classList.add('hide');
+    setTimeout(()=> cover.style.display = "none", 520);
+  }
+
+  // Lightbox
+  function openLightbox(src, title){
+    lightboxTitle.textContent = title;
+    lightboxImg.src = src;
+    lightbox.classList.add('show');
+    lightbox.setAttribute('aria-hidden', 'false');
+  }
+  function closeLightbox(){
+    lightbox.classList.remove('show');
+    lightbox.setAttribute('aria-hidden', 'true');
+    lightboxImg.src = "";
+  }
+
+  // Share
+  async function shareCurrent(){
+    const e = entries[idx];
+    const shareText = `SemmelSiggi – Weihnachtsstreak (Tag ${e.day}): ${e.title}`;
+    try{
+      if(navigator.share){
+        await navigator.share({ title: "SemmelSiggi und der Weihnachtsstreak", text: shareText });
+        showToast("Geteilt 🫶");
+      }else{
+        await navigator.clipboard.writeText(shareText);
+        showToast("Share-Text kopiert ✨");
+      }
+    }catch{
+      showToast("Teilen abgebrochen 😄");
+    }
+  }
+
+  // Confetti (simple canvas)
+  const confettiCanvas = document.getElementById('confettiCanvas');
+  const ctx = confettiCanvas.getContext('2d');
+  let confetti = [];
+  function resizeConfetti(){
+    confettiCanvas.width = window.innerWidth * devicePixelRatio;
+    confettiCanvas.height = window.innerHeight * devicePixelRatio;
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  }
+  window.addEventListener('resize', resizeConfetti);
+
+  function launchConfetti(){
+    resizeConfetti();
+    const colors = ["#ff4fd8", "#ff7ae6", "#ffffff", "#ffd8f4", "#b8b8d6"];
+    const count = 180;
+
+    confetti = Array.from({length: count}).map(()=>({
+      x: Math.random() * window.innerWidth,
+      y: -20 - Math.random() * window.innerHeight * 0.2,
+      r: 3 + Math.random() * 5,
+      w: 6 + Math.random() * 10,
+      h: 4 + Math.random() * 10,
+      vy: 2 + Math.random() * 4.5,
+      vx: -1.2 + Math.random() * 2.4,
+      rot: Math.random() * Math.PI,
+      vrot: -0.12 + Math.random() * 0.24,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 280 + Math.random() * 120
+    }));
+
+    let frames = 0;
+    function tick(){
+      frames++;
+      ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+
+      confetti.forEach(p=>{
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.vrot;
+        p.vy *= 0.998;
+        p.vy += 0.02; // gravity
+        p.life--;
+
+        // wrap
+        if(p.x < -40) p.x = window.innerWidth + 40;
+        if(p.x > window.innerWidth + 40) p.x = -40;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 120));
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+      });
+
+      confetti = confetti.filter(p => p.life > 0 && p.y < window.innerHeight + 80);
+
+      if(frames < 520 && confetti.length){
+        requestAnimationFrame(tick);
+      }else{
+        ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function init(){
+    buildTimeline();
+    currentCard = makeCard(entries[idx]);
+    stage.appendChild(currentCard);
+    updateProgress();
+
+    btnPrev.addEventListener('click', ()=> goTo(idx-1, 'prev'));
+    btnNext.addEventListener('click', ()=> goTo(idx+1, 'next'));
+    btnShare.addEventListener('click', shareCurrent);
+
+    // keyboard
+    window.addEventListener('keydown', (e)=>{
+      if(lightbox.classList.contains('show') && e.key === 'Escape') closeLightbox();
+      if(e.key === 'ArrowLeft') goTo(idx-1, 'prev');
+      if(e.key === 'ArrowRight') goTo(idx+1, 'next');
+    });
+
+    // swipe on stage
+    stage.addEventListener('touchstart', (e)=>{
+      if(!e.touches || e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, {passive:true});
+    stage.addEventListener('touchend', (e)=>{
+      if(touchStartX == null) return;
+      const t = e.changedTouches && e.changedTouches[0];
+      if(!t) return;
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+      touchStartX = null; touchStartY = null;
+      if(Math.abs(dy) > Math.abs(dx) * 1.2) return;
+      const threshold = 50;
+      if(dx > threshold) goTo(idx-1, 'prev');
+      if(dx < -threshold) goTo(idx+1, 'next');
+    }, {passive:true});
+
+    // stage height
+    const fixHeight = ()=> stage.style.minHeight = Math.max(window.innerHeight * 0.62, 420) + "px";
+    fixHeight(); window.addEventListener('resize', fixHeight);
+
+    // cover
+    btnStart.addEventListener('click', ()=>{
+      hideCover();
+      showToast("Willkommen im Streak-Archiv ✨");
+    });
+    btnCoverScroll.addEventListener('click', ()=>{
+      hideCover();
+      window.scrollTo({top: 0, behavior: "smooth"});
+      showToast("Start bei Tag 12 🧭");
+    });
+
+    // lightbox close
+    btnLightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e)=>{
+      if(e.target === lightbox) closeLightbox();
+    });
+
+    // pre-resize confetti canvas
+    resizeConfetti();
+  }
+
+  init();
+</script>
+</body>
+</html>
